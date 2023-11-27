@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset= "utf-8" name="viewport" content="width=device-wisth, initial-scale=1.0">
+    <title>Analyse de sentiments</title>
+    <link rel="stylesheet" href="static/css/style.css">
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="navigation">
+            <ul>
+                <li>
+                    <a href="#">
+                        <span class="icon"><ion-icon name="stats-chart"></ion-icon></span>
+                        <span class="title"> Analyse de sentiment</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon"><ion-icon name="bug-outline"></ion-icon></span>
+                        <span class="title"> Titre 2</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon"><ion-icon name="bug-outline"></ion-icon></span>
+                        <span class="title"> Titre 3</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        
+        <!-- main -->
+        <div class="main">
+            <!-- popup -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-popup">
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                    <div class="alert alert-danger alter-dismissable fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close ml-auto" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success alter-dismissable fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close ml-auto" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="topbar">
+                <div class="toggle">
+                    <ion-icon name="menu"></ion-icon>
+                </div>
+                <!-- search -->
+                <div class="search">
+                    <form method="POST">
+                        <label>
+                            <input type="text" placeholder="Recherchez un thème">
+                            <button class="btn btn-primary shadow" type="submit"><ion-icon name="search"></ion-icon></button>   
+                        </label>
+                    </form>   
+                </div>
+                <!-- user -->
+                <div class="user">
+                    <img src="static/img/damienPasBo.jpg">
+                </div>
+            </div>
+
+            <!-- cards -->
+            <div class="cardBox">
+                <div class="card">
+                    <div>
+                        <div class="sentiment">{{ sentiment_trouve }}</div>
+                        <div class="cardName">Sentiment du moment</div>
+                    </div>
+                    <div class="iconBx">
+                        <ion-icon name="analytics"></ion-icon>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div>
+                        {% if precision_sentiment < 75 %}
+                        <div class="numbers" style="color: #e63946;">
+                            {{ precision_sentiment }}%
+                        </div>
+                        {% else %}
+                        <div class="numbers" style="color: #57cc99;">
+                            {{ precision_sentiment }}%
+                        </div>
+                        {% endif %}
+                        <div class="cardName">Précision</div>
+                    </div>
+                    <div class="iconBx">
+                        <ion-icon name="pulse-outline"></ion-icon>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div>
+                        <div class="numbers">{{ nombre_mots }}</div>
+                        <div class="cardName">Nombre de messages analysés</div>
+                    </div>
+                    <div class="iconBx">
+                        <ion-icon name="speedometer-outline"></ion-icon>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div>
+                        <div class="numbers">666</div>
+                        <div class="cardName">Le diable</div>
+                    </div>
+                    <div class="iconBx">
+                        <ion-icon name="skull-outline"></ion-icon>
+                    </div>
+                </div>
+            </div>
+
+            <!-- graphiques -->
+            <div class="nuageMotsDiv">
+                <h2>Nuage de mots</h2>
+                <div id="nuageMotsContainer"></div>
+            </div>
+            <div class="details">
+                <div class="nuageMots">
+                    <h2>Répartition</h2>
+                    <canvas id="Repartition"></canvas>
+                </div>
+
+                <div class="histogramme_sentiments">
+                    <h2>Détails sentiments</h2>
+                    <canvas id="histogrammeSentimentsChart"></canvas>
+                </div>
+            </div>    
+
+        </div>
+
+    </div>
+    
+
+    <!-- Pour les graphiques -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.6/wordcloud2.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-base.min.js"></script>
+	<script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-tag-cloud.min.js"></script>
+
+    <script>
+        // menu toggle
+        let toggle = document.querySelector('.toggle');
+        let navigation = document.querySelector('.navigation');
+        let main = document.querySelector('.main');
+
+        toggle.onclick = function(){
+            navigation.classList.toggle('active')
+            main.classList.toggle('active')
+        }
+
+
+        // add hovered class in selected list item
+        let list = document.querySelectorAll('.navigation li')
+        function activeLink(){
+            list.forEach((item) =>
+            item.classList.remove('hovered'));
+            this.classList.add('hovered');
+        }
+        list.forEach((item)=>
+        item.addEventListener('mouseover', activeLink));
+    </script>
+
+    <script
+    src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"
+    ></script>
+    
+    <script
+    src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"
+    ></script>
+    
+    <script>
+        var liste_histogramme = JSON.parse('{{liste_histo|tojson}}');
+        var liste_cam = JSON.parse('{{liste_cam|tojson}}');
+        var liste_nuage = JSON.parse('{{liste_nuage|tojson}}');
+
+
+        // ---------------------------------------------------------------------------- HISTOGRAMME
+        const histo = document.getElementById('histogrammeSentimentsChart');
+
+
+        new Chart(histo, {
+        type: 'bar',
+        data: {
+            labels: liste_histogramme[0],
+            datasets: [{
+            label: 'Effectif de sentiments',
+            data: liste_histogramme[1],
+            borderWidth: 1,
+            backgroundColor: liste_histogramme[2]
+            }]
+        },
+        options: {
+            scales: {
+            y: {
+                beginAtZero: true
+            }
+            }
+        }
+        });
+
+        
+
+
+
+        // ------------------------------------------------------------------------ CAMEMBERT
+        const data = {
+        labels: liste_cam[0],
+        datasets: [{
+            label: 'Titre du Camembert',
+            data: liste_cam[1],
+            backgroundColor: liste_cam[2]
+        }]
+        };
+
+
+
+        const nuage_2_mots = document.getElementById('Repartition');
+
+        new Chart(nuage_2_mots, {
+        type: 'polarArea',
+        data: data,
+        options: {}
+        });
+
+
+
+        // ----------------------------------------------------------------------------------------------- NUAGE DE MOTS
+        anychart.onDocumentReady(function(){
+        var data=liste_nuage;
+        // create a tag (word) cloud chart
+        var chart=anychart.tagCloud(data, mode='by-word');
+        //initial for colors
+        var customcolor=anychart.scales.linearColor();
+        //add colors
+        customcolor.colors(["#45b6fe",'#f94449', "#DE73FF"]);
+        // set the color scale as the color scale of the chart
+        // chart.colorScale(customcolor);
+        chart.hovered().stroke('#1f66ad');
+        // enable a color range
+        chart.colorRange(true);
+        // set the color range length
+        chart.colorRange().length('80%');
+        // chart.bounds(50, '20%');
+        chart.textSpacing(3);
+        chart.angles([0]);
+
+        // display the word cloud chart
+        chart.container('nuageMotsContainer');
+        chart.draw();
+        });
+  
+
+    </script>
+
+</body>
+</html>
