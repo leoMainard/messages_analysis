@@ -1,6 +1,6 @@
 import pymongo
-import pandas as pd
 import time
+from datetime import datetime
 
 # ----------------------------- Fonction
 def mongoDB_connexion():
@@ -9,53 +9,63 @@ def mongoDB_connexion():
     db = connex.test_db
     return db
 
-def delete_bdd_values(db):
-    db.TDL_bdd.delete_many({})
-    print("Valeurs de la base de données 'TDL_bdd' supprimées.")
+def add_values_bdd(bdd_source, bdd_destination, nb_lignes_ajouter=100):
 
-def add_values_bdd(bdd_source, bdd_destination, time_sleep):
-    print("Pour le moment, cette fonction s'arrête après l'ajout de 300 lignes.")
-    print("Supprimer 'compte' pour tout ajouter.\n")
-
-    i = 1
-    if bdd_destination.count_documents({ 'index': 1 }, limit = 1) != 0:
-        i = int(bdd_destination.find_one(sort=[('index', pymongo.DESCENDING)])['index'])
-        i = i+1
-    nb_ajout = 1
-
-    compte = 0 # Supprimer
-
-    for line in bdd_source.find():
-
-        if compte == 3:break # Supprimer
+    # ---------------------- Récupération de x lignes aléatoires à ajouter
+    pipeline = [
+        {"$sample": {"size": nb_lignes_ajouter}}
+    ]
+    
+    resultats = list(bdd_source.aggregate(pipeline))
+    
+    # ---------------------- Ajout des lignes dans la base de données
+    for line in resultats:
 
         insert = {
             'message' : line['message']
             ,'Nom_du_rappeur' : line['Nom_du_rappeur']
             ,'date_message': line['date_message']
-            ,'index' : i
         }
 
         bdd_destination.insert_one(insert) # insertion de la ligne dans la base de données
 
-        i += 1
+    print(f">>> Ajout de {nb_lignes_ajouter} lignes à la base.")
+    
+def delete_old_values(base, date):
+    nb_supprime = 0 
+    date1 = datetime.strptime(date, "%d/%m/%Y")
 
-        nb_ajout += 1
-        if (nb_ajout % 100) == 0:
-            # Patienter 30 secondes puis poursuivre
-            print("Ajout de 100 nouveaux messages dans la base de données.")
+    for line in base.find():
+        date_message = datetime.strptime(line['date_message'], "%d/%m/%Y")
 
-            compte += 1 # Supprimer
+        difference = date1 - date_message
+        
+        if difference.days > 7:
+            base.delete_one({"_id": line["_id"]})
+            nb_supprime += 1
 
-            time.sleep(time_sleep)
+    print(difference.days)
+    print(f">>> Suppression de {nb_supprime} lignes.")
 
-import json
-import random
+def delete_bdd_values(base):
+    base.delete_many({})
+    print(">>> Valeurs de la base de données supprimées.")
+
+
 # ----------------------------- Code
 if __name__ == '__main__':
+    print("---- Action sur la base TDL_bdd : ")
+    # ------------------------------------------------ Connexion à la base de données
     db = mongoDB_connexion()
-    # delete_bdd_values(db)
 
-    add_values_bdd(db.TDL_source, db.TDL_bdd,1)
+    # ------------------------------------------------ Ajout de valeurs dans la base de données
+    # for i in range(3):
+    #     add_values_bdd(db.TDL_source, db.TDL_bdd)
+    #     time.sleep(5)
+
+    # ------------------------------------------------ Suppression de valeurs dans la base de données
+    delete_old_values(db.TDL_bdd,"10/12/2023") # datetime.now()
+    # delete_bdd_values(db.TDL_bdd)
+
 
     
