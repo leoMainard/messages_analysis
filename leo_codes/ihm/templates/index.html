@@ -67,7 +67,7 @@
                 <div class="search">
                     <form method="POST">
                         <label>
-                            <input type="text" placeholder="Recherchez un thème">
+                            <input type="text" name="search" placeholder="Recherchez un thème">
                             <button class="btn btn-primary shadow" type="submit"><ion-icon name="search"></ion-icon></button>   
                         </label>
                     </form>   
@@ -80,6 +80,16 @@
 
             <!-- cards -->
             <div class="cardBox">
+                <div class="card">
+                    <div>
+                        <div class="numbers">{{ recherche_valeur }}</div>
+                        <div class="cardName">Le diable</div>
+                    </div>
+                    <div class="iconBx">
+                        <ion-icon name="skull-outline"></ion-icon>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div>
                         <div class="sentiment">{{ sentiment_trouve }}</div>
@@ -118,15 +128,6 @@
                     </div>
                 </div>
 
-                <div class="card">
-                    <div>
-                        <div class="numbers">666</div>
-                        <div class="cardName">Le diable</div>
-                    </div>
-                    <div class="iconBx">
-                        <ion-icon name="skull-outline"></ion-icon>
-                    </div>
-                </div>
             </div>
 
             <!-- graphiques -->

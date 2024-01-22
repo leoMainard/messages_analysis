@@ -1,5 +1,5 @@
 from flask import Flask, render_template, flash, request, jsonify
-from test import histogramme, camembert, nuage_mots
+from test import histogramme, camembert, nuage_mots, sentiments
 import json
 import random
 
@@ -13,20 +13,14 @@ app.config['JSON_AS_ASCII'] = False  # Utilisez UTF-8 pour les réponses JSON
 @app.route('/', methods=['GET','POST'])
 def index():
     if request.method == 'POST':
-        # email = request.form.get('email')
-        data_histo = histogramme()
-        data_cam = camembert()
-        data_nuage = nuage_mots()
+        recherche = request.form.get('search')
+        sentiment, precision, nb_messages, data_histo, data_cam, data_nuage, message_erreur = sentiments(recherche)
 
-        temp = ['Heureux', 'Mitige', 'Triste', 'Enthousiaste', 'Stresse']
-
-        nb_mots = random.randint(0, 1000)
-        precision = random.randint(0, 100)
-        sentiment = random.choice(temp)
-
-        # flash('Une erreur est survenue !', category='error')
+        if message_erreur:
+            flash('Aucun résultat trouvé pour cette recherche.', category='error')
+            
         return render_template('index.html', liste_histo = data_histo, liste_cam = data_cam, liste_nuage = data_nuage,
-                               nombre_mots = nb_mots, precision_sentiment = precision, sentiment_trouve = sentiment)
+                               nombre_mots = nb_messages, precision_sentiment = precision, sentiment_trouve = sentiment, recherche_valeur = recherche)
 
     return render_template('index.html', liste_histo = [], liste_cam = [], liste_nuage = [],
                                nombre_mots = 0, precision_sentiment = 0, sentiment_trouve = 'None')
