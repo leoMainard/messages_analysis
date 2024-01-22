@@ -4,7 +4,6 @@ from datetime import datetime
 
 # ----------------------------- Fonction
 def mongoDB_connexion():
-    # connex = pymongo.MongoClient("mongodb://127.0.0.1:27017/")
     connex = pymongo.MongoClient("mongodb://usertest:passusertest33@10.8.2.5:27017/?authMechanism=DEFAULT&authSource=test_db")
     db = connex.test_db
     return db
@@ -59,12 +58,12 @@ if __name__ == '__main__':
     db = mongoDB_connexion()
 
     # ------------------------------------------------ Ajout de valeurs dans la base de données
-    # for i in range(3):
-    #     add_values_bdd(db.TDL_source, db.TDL_bdd)
-    #     time.sleep(5)
+    for i in range(30):
+        add_values_bdd(db.TDL_source, db.TDL_bdd)
+        time.sleep(0.1)
 
     # ------------------------------------------------ Suppression de valeurs dans la base de données
-    delete_old_values(db.TDL_bdd,"10/12/2023") # datetime.now()
+    # delete_old_values(db.TDL_bdd,"10/12/2023") # datetime.now()
     # delete_bdd_values(db.TDL_bdd)
 
 

@@ -40,6 +40,8 @@ def anlayse_sentiment(texte):
 
     return sentiment
 
+def test_analyse_sentiment(texte):
+    pass
 
 def add_values_sentiments(bdd_source, bdd_destination):
     # Récupérer les index de la destination
@@ -68,17 +70,26 @@ def add_values_sentiments(bdd_source, bdd_destination):
 
         bdd_destination.insert_one(insert) # insertion de la ligne dans la base de données
 
-    print("Nombre de documents trouvés :",x)
+    print("Nombre de documents ajoutés :",x)
 
 
 if __name__ == '__main__':
     print("---- Action sur la base TDL_sentiments : ")
     # ------------------------------------------------ Connexion à la base de données
-    db = mongoDB_connexion()
+    # db = mongoDB_connexion()
 
     # ------------------------------------------------ Ajout de valeurs dans la base de données
-    add_values_sentiments(db.TDL_bdd, db.TDL_sentiments)
+    # add_values_sentiments(db.TDL_bdd, db.TDL_sentiments)
 
     # ------------------------------------------------ Suppression de valeurs dans la base de données
     # delete_old_values(db.TDL_sentiments,"10/12/2023") # datetime.now()
     # delete_bdd_values(db.TDL_sentiments)
+
+
+
+    texte = "PLK, versatile mais certaines collabs ne sont pas à la hauteur. Choisir avec plus de discernement."
+    texte2 = "plk versatile certaines collabs hauteur choisir plus discernement"
+
+    sentiment = test_analyse_sentiment(texte)
+
+    print(sentiment)
